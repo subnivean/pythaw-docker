@@ -10,4 +10,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 WORKDIR /app
 RUN mkdir /data
 
-CMD ["python", "ds18b20.py"]
+CMD ["python", "checktemp.py"]

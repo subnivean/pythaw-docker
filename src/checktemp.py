@@ -3,9 +3,9 @@ import glob
 import time
 import datetime
 import numpy as np
-from w1thermsensor import W1ThermSensor, SensorNotReadyError
 
 # Current directory
+import ambientweather as aw
 import mailsend
 from powerswitch import Powerswitch
 
@@ -13,24 +13,16 @@ from powerswitch import Powerswitch
 MINTEMP = 36.0
 MAXTEMP = 39.0
 ALERTTEMP = 35.5
-THERMOOFFSET = 0.7
-DEGREESF = 'fahrenheit'
 
-# temperature sensor middle pin connected channel 0 of mcp3008
-PSPIN = 22  # Powerswitch pin
+SENSORNAME = "temp2f"
+
+#PSPIN = 22  # Powerswitch pin
 
 AVGINTERVAL = 15  # Interval for averaging of readings
 MEANOUTFILE = "/data/meantemps.out"
-# RAWOUTFILE = "rawtemps.out"
 
-base_dir = '/sys/bus/w1/devices/'
-device_folder = glob.glob(base_dir + '28*')[0]
-device_file = device_folder + '/w1_slave'
+#ps = Powerswitch(PSPIN)
 
-ps = Powerswitch(PSPIN)
-sensor = W1ThermSensor(offset=THERMOOFFSET, offset_unit=DEGREESF)
-
-# rawoutfh = open(RAWOUTFILE, "a")
 meanoutfh = open(MEANOUTFILE, "ab", 0)
 
 cnt = 0
@@ -43,17 +35,10 @@ last30 = []  # Container to hold last 30 minutes
 while True:
     cnt += 1
 
-    try:
-        tempF = sensor.get_temperature(unit=DEGREESF)
-    except SensorNotReadyError:
-        #print("Waiting for sensor to become ready...")
-        time.sleep(15)
-        continue
-
+    tempF = float(aw.get_reading(SENSORNAME))
     temps.append(tempF)
 
     curtime = datetime.datetime.now().isoformat().split('.')[0]
-    # rawoutfh.write(f"{curtime} {tempF:.2f}\n")
 
     if cnt % AVGINTERVAL != 0:
         # print(f"secs={AVGINTERVAL - cnt % AVGINTERVAL:2d} cnt={cnt} "
@@ -89,20 +74,23 @@ while True:
         temps = []  # Reset
 
         if meantemp < ALERTTEMP:
-            if ps.is_on:
-                msgqueue.append(("*** Heater problem? ***",
-                                 f"Temp dropped below {ALERTTEMP}!", False))
-                ps.on()  # Try again
+            #if ps.is_on:
+            #    msgqueue.append(("*** Heater problem? ***",
+            #                     f"Temp dropped below {ALERTTEMP}!", False))
+            #    ps.on()  # Try again
+            pass
         elif meantemp < MINTEMP:
-            if ps.is_off:
-                msgqueue.append(("Turning on the heater",
-                                 f"Temp dropped below {MINTEMP}", False))
-                ps.on()
+            #if ps.is_off:
+            #    msgqueue.append(("Turning on the heater",
+            #                     f"Temp dropped below {MINTEMP}", False))
+            #    ps.on()
+            pass
         elif meantemp > MAXTEMP:
-            if ps.is_on:
-                msgqueue.append(("Turning off the heater",
-                                 f"Temp above {MAXTEMP}", False))
-                ps.off()
+            #if ps.is_on:
+            #    msgqueue.append(("Turning off the heater",
+            #                     f"Temp above {MAXTEMP}", False))
+            #    ps.off()
+            pass
 
         # Send any queued messages
         while len(msgqueue) > 0:
