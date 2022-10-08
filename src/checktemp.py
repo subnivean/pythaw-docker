@@ -7,7 +7,7 @@ import numpy as np
 # Current directory
 import ambientweather as aw
 import mailsend
-from powerswitch import Powerswitch
+from smartplug import SmartPlug
 
 # All temps in degrees F
 MINTEMP = 36.0
@@ -16,12 +16,12 @@ ALERTTEMP = 35.5
 
 SENSORNAME = "temp2f"
 
-#PSPIN = 22  # Powerswitch pin
+SPIP = 23  # SmartPlug IP address (in 192.168.1.xx range)
 
 AVGINTERVAL = 15  # Interval for averaging of readings
 MEANOUTFILE = "/data/meantemps.out"
 
-#ps = Powerswitch(PSPIN)
+sp = SmartPlug(SPIP)
 
 meanoutfh = open(MEANOUTFILE, "ab", 0)
 
@@ -42,7 +42,7 @@ while True:
 
     if cnt % AVGINTERVAL != 0:
         # print(f"secs={AVGINTERVAL - cnt % AVGINTERVAL:2d} cnt={cnt} "
-        #       f"temp={tempF:.2f} switch:{ps.is_on}")
+        #       f"temp={tempF:.2f} switch:{sp.is_on}")
         pass
     else:
         #print("Here!")
@@ -74,22 +74,22 @@ while True:
         temps = []  # Reset
 
         if meantemp < ALERTTEMP:
-            #if ps.is_on:
-            #    msgqueue.append(("*** Heater problem? ***",
-            #                     f"Temp dropped below {ALERTTEMP}!", False))
-            #    ps.on()  # Try again
+            if sp.is_on:
+                msgqueue.append(("*** Heater problem? ***",
+                                 f"Temp dropped below {ALERTTEMP}!", False))
+               sp.on()  # Try again
             pass
         elif meantemp < MINTEMP:
-            #if ps.is_off:
-            #    msgqueue.append(("Turning on the heater",
-            #                     f"Temp dropped below {MINTEMP}", False))
-            #    ps.on()
+            if sp.is_off:
+                msgqueue.append(("Turning on the heater",
+                                 f"Temp dropped below {MINTEMP}", False))
+                sp.on()
             pass
         elif meantemp > MAXTEMP:
-            #if ps.is_on:
-            #    msgqueue.append(("Turning off the heater",
-            #                     f"Temp above {MAXTEMP}", False))
-            #    ps.off()
+            if sp.is_on:
+                msgqueue.append(("Turning off the heater",
+                                 f"Temp above {MAXTEMP}", False))
+                sp.off()
             pass
 
         # Send any queued messages
