@@ -11,6 +11,7 @@ Invoked from `rc.local` as follows:
 
 ```
 cd /home/pi/pythaw-docker && ./run_docker.sh &
+```
 
 Docker Instructions
 -------------------------
