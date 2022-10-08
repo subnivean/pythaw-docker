@@ -77,7 +77,7 @@ while True:
             if sp.is_on:
                 msgqueue.append(("*** Heater problem? ***",
                                  f"Temp dropped below {ALERTTEMP}!", False))
-               sp.on()  # Try again
+                sp.on()  # Try again
             pass
         elif meantemp < MINTEMP:
             if sp.is_off:
