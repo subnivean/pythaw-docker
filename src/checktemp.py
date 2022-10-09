@@ -21,23 +21,25 @@ SPIP = 23  # SmartPlug IP address (in 192.168.1.xx range)
 
 MEANOUTFILE = "/data/meantemps.out"
 
+curtime = datetime.datetime.now()
+curtimeiso = curtime.isoformat().split('.')[0]
+
 try:
     sp = SmartPlug(SPIP)
 except:
-    mailsend.send(f"SmartPlug #{SPIP} is not responding", "Sorry!")
+    if curtime.minute == 0:
+        mailsend.send(f"SmartPlug #{SPIP} is not responding", "Sorry!")
     sys.exit()
 
 try:
     aw = WeatherData(WXSTATIONNUM)
 except:
-    mailsend.send(f"Problem accessing Ambientweather", f"{WXSTATIONNUM=}")
+    if curtime.minute == 0:
+        mailsend.send(f"Problem accessing Ambientweather", f"{WXSTATIONNUM=}")
     sys.exit()
 
 lastreport = aw.get_reading('date')
 lastreportdt = datetime.datetime.fromisoformat(lastreport.split('.')[0])
-
-curtime = datetime.datetime.now()
-curtimeiso = curtime.isoformat().split('.')[0]
 timedeltasec = (curtime - lastreportdt).seconds
 
 try:
@@ -69,6 +71,7 @@ meanoutfh = open(MEANOUTFILE, "ab", 0)
 
 tempF = float(aw.get_reading(WXTEMPSENSOR))
 
+curtimeiso = curtime.isoformat().split('.')[0]
 dline = bytes(f"{curtimeiso} {tempF:.2f}\n", "UTF-8")
 meanoutfh.write(dline)
 
