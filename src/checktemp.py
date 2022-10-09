@@ -49,7 +49,6 @@ if timedeltasec > 3600 and curtime.minute == 0:
     mailsend.send(f"Sensor #{SENSORNUM} not reporting",
                   f"Last report: {lastreport}")
 
-
 #print(f"{battlevel=}")
 #print(f"{lastreport=}")
 #print(f"{lastreportdt=}")
