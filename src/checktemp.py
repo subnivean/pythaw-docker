@@ -2,6 +2,7 @@
 import datetime
 import sys
 
+
 # Current directory
 from ambientweather import WeatherData
 import mailsend
