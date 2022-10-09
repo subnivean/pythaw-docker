@@ -12,16 +12,26 @@ MINTEMP = 36.0
 MAXTEMP = 39.0
 ALERTTEMP = 35.5
 
-SENSORNUM = 2
-TEMPSENSOR = f"temp{SENSORNUM}f"
-BATTNAME = f"batt{SENSORNUM}"
+WXSTATIONNUM = 0  # Per Ambientweather
+WXSENSORNUM = 2
+WXTEMPSENSOR = f"temp{WXSENSORNUM}f"
+WXBATTNAME = f"batt{WXSENSORNUM}"
 
 SPIP = 23  # SmartPlug IP address (in 192.168.1.xx range)
 
 MEANOUTFILE = "/data/meantemps.out"
 
-sp = SmartPlug(SPIP)
-aw = WeatherData(0)
+try:
+    sp = SmartPlug(SPIP)
+except:
+    mailsend.send(f"SmartPlug #{SPIP} is not responding", "Sorry!")
+    sys.exit()
+
+try:
+    aw = WeatherData(WXSTATIONNUM)
+except:
+    mailsend.send(f"Problem accessing Ambientweather", f"{WXSTATIONNUM=}")
+    sys.exit()
 
 lastreport = aw.get_reading('date')
 lastreportdt = datetime.datetime.fromisoformat(lastreport.split('.')[0])
@@ -31,22 +41,22 @@ curtimeiso = curtime.isoformat().split('.')[0]
 timedeltasec = (curtime - lastreportdt).seconds
 
 try:
-    battlevel = float(aw.get_reading(BATTNAME))
+    battlevel = float(aw.get_reading(WXBATTNAME))
 except KeyError:
     # Send 'sensor offline' message every hour
     if curtime.minute == 0:
-        mailsend.send(f"Sensor #{SENSORNUM} is offline",
+        mailsend.send(f"Sensor #{WXSENSORNUM} is offline",
                       f"No data via Ambientweather, sorry.")
     sys.exit()
 
 # Send 'low battery' message once a day
 if battlevel < 1.0 and curtime.hour == 12 and curtime.minute == 0:
-    mailsend.send(f"Low battery level on sensor #{SENSORNUM}",
+    mailsend.send(f"Low battery level on sensor #{WXSENSORNUM}",
                   f"Current level: {battlevel}")
 
 # Send 'not reporting' message every hour
 if timedeltasec > 3600 and curtime.minute == 0:
-    mailsend.send(f"Sensor #{SENSORNUM} not reporting",
+    mailsend.send(f"Sensor #{WXSENSORNUM} not reporting",
                   f"Last report: {lastreport}")
 
 #print(f"{battlevel=}")
@@ -57,7 +67,7 @@ if timedeltasec > 3600 and curtime.minute == 0:
 
 meanoutfh = open(MEANOUTFILE, "ab", 0)
 
-tempF = float(aw.get_reading(TEMPSENSOR))
+tempF = float(aw.get_reading(WXTEMPSENSOR))
 
 dline = bytes(f"{curtimeiso} {tempF:.2f}\n", "UTF-8")
 meanoutfh.write(dline)

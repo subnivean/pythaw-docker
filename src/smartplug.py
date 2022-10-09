@@ -10,6 +10,9 @@ class SmartPlug():
     def __init__(self, ip):
         self.ip = str(ip)
         self.url = URLTMPL.format(ip=self.ip)
+        # Run a quick check so we can bail
+        # during initializtion if no connection.
+        self._init_on = self.is_on
 
     def on(self):
         requests.post(self.url + POWERON)
@@ -20,12 +23,12 @@ class SmartPlug():
     @property
     def is_on(self):
         res = requests.post(self.url + POWERCHK)
-        return 'ON' in res.content.decode('utf-8')  
+        return 'ON' in res.content.decode('utf-8')
 
     @property
     def is_off(self):
         res = requests.post(self.url + POWERCHK)
-        return 'OFF' in res.content.decode('utf-8')  
+        return 'OFF' in res.content.decode('utf-8')
 
 if __name__ == "__main__":
     import time
@@ -42,5 +45,5 @@ if __name__ == "__main__":
         sp.off()
         print(f"Power status: {sp.is_on}")
         time.sleep(1)
-        
+
 
