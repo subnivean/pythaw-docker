@@ -35,20 +35,16 @@ while True:
         if sp.is_on:
             msgqueue.append(("*** Heater problem? ***",
                              f"Temp dropped below {ALERTTEMP}!", False))
-            sp.on()  # Try again
-        pass
     elif tempF < MINTEMP:
         if sp.is_off:
             msgqueue.append(("Turning on the heater",
                              f"Temp dropped below {MINTEMP}", False))
             sp.on()
-        pass
     elif tempF > MAXTEMP:
         if sp.is_on:
             msgqueue.append(("Turning off the heater",
                              f"Temp above {MAXTEMP}", False))
             sp.off()
-        pass
 
     # Send any queued messages
     while len(msgqueue) > 0:
@@ -60,4 +56,4 @@ while True:
             #print("Mail not sent!")
             pass
 
-    time.sleep(60)
+    time.sleep(59)
