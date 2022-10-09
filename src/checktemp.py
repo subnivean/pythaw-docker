@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import datetime
+import sys
 
 # Current directory
 from ambientweather import WeatherData
@@ -22,13 +23,21 @@ MEANOUTFILE = "/data/meantemps.out"
 sp = SmartPlug(SPIP)
 aw = WeatherData(0)
 
-battlevel = float(aw.get_reading(BATTNAME))
 lastreport = aw.get_reading('date')
 lastreportdt = datetime.datetime.fromisoformat(lastreport.split('.')[0])
 
 curtime = datetime.datetime.now()
 curtimeiso = curtime.isoformat().split('.')[0]
 timedeltasec = (curtime - lastreportdt).seconds
+
+try:
+    battlevel = float(aw.get_reading(BATTNAME))
+except KeyError:
+    # Send 'sensor offline' message every hour
+    if curtime.minute == 0:
+        mailsend.send(f"Sensor #{SENSORNUM} is offline",
+                      f"No data via Ambientweather, sorry.")
+    sys.exit()
 
 # Send 'low battery' message once a day
 if battlevel < 1.0 and curtime.hour == 12 and curtime.minute == 0:
