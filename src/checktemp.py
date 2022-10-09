@@ -23,37 +23,36 @@ sp = SmartPlug(SPIP)
 meanoutfh = open(MEANOUTFILE, "ab", 0)
 
 msgqueue = []
-while True:
 
-    curtime = datetime.datetime.now().isoformat().split('.')[0]
-    tempF = float(aw.get_reading(SENSORNAME))
+curtime = datetime.datetime.now().isoformat().split('.')[0]
+tempF = float(aw.get_reading(SENSORNAME))
 
-    dline = bytes(f"{curtime} {tempF:.2f}\n", "UTF-8")
-    meanoutfh.write(dline)
+dline = bytes(f"{curtime} {tempF:.2f}\n", "UTF-8")
+meanoutfh.write(dline)
 
-    if tempF < ALERTTEMP:
-        if sp.is_on:
-            msgqueue.append(("*** Heater problem? ***",
-                             f"Temp dropped below {ALERTTEMP}!", False))
-    elif tempF < MINTEMP:
-        if sp.is_off:
-            msgqueue.append(("Turning on the heater",
-                             f"Temp dropped below {MINTEMP}", False))
-            sp.on()
-    elif tempF > MAXTEMP:
-        if sp.is_on:
-            msgqueue.append(("Turning off the heater",
-                             f"Temp above {MAXTEMP}", False))
-            sp.off()
+if tempF < ALERTTEMP:
+    if sp.is_on:
+        msgqueue.append(("*** Heater problem? ***",
+                         f"Temp dropped below {ALERTTEMP}!", False))
+    sp.on()
+elif tempF < MINTEMP:
+    if sp.is_off:
+        msgqueue.append(("Turning on the heater",
+                         f"Temp dropped below {MINTEMP}", False))
+    sp.on()
+elif tempF > MAXTEMP:
+    if sp.is_on:
+        msgqueue.append(("Turning off the heater",
+                         f"Temp above {MAXTEMP}", False))
+    sp.off()
 
-    # Send any queued messages
-    while len(msgqueue) > 0:
-        subj, msg, alert = msgqueue.pop(0)
-        try:
-            mailsend.send(subj, msg, alert=alert)
-            #print("Mail sent!")
-        except:
-            #print("Mail not sent!")
-            pass
+# Send any queued messages
+while len(msgqueue) > 0:
+    subj, msg, alert = msgqueue.pop(0)
+    try:
+        mailsend.send(subj, msg, alert=alert)
+        #print("Mail sent!")
+    except:
+        #print("Mail not sent!")
+        pass
 
-    time.sleep(59)
