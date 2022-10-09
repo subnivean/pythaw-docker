@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import time
 import datetime
 
 # Current directory
@@ -22,8 +21,6 @@ sp = SmartPlug(SPIP)
 
 meanoutfh = open(MEANOUTFILE, "ab", 0)
 
-msgqueue = []
-
 curtime = datetime.datetime.now().isoformat().split('.')[0]
 tempF = float(aw.get_reading(SENSORNAME))
 
@@ -32,27 +29,17 @@ meanoutfh.write(dline)
 
 if tempF < ALERTTEMP:
     if sp.is_on:
-        msgqueue.append(("*** Heater problem? ***",
-                         f"Temp dropped below {ALERTTEMP}!", False))
+        mailsend.send("*** Heater problem? ***",
+                      f"Temp dropped below {ALERTTEMP}!")
     sp.on()
 elif tempF < MINTEMP:
     if sp.is_off:
-        msgqueue.append(("Turning on the heater",
-                         f"Temp dropped below {MINTEMP}", False))
+        mailsend.send("Turning on the heater",
+                      f"Temp dropped below {MINTEMP}")
     sp.on()
 elif tempF > MAXTEMP:
     if sp.is_on:
-        msgqueue.append(("Turning off the heater",
-                         f"Temp above {MAXTEMP}", False))
+        mailsend.send("Turning off the heater",
+                      f"Temp above {MAXTEMP}")
     sp.off()
-
-# Send any queued messages
-while len(msgqueue) > 0:
-    subj, msg, alert = msgqueue.pop(0)
-    try:
-        mailsend.send(subj, msg, alert=alert)
-        #print("Mail sent!")
-    except:
-        #print("Mail not sent!")
-        pass
 
