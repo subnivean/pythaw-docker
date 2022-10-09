@@ -10,28 +10,39 @@ os.environ.update(**awsecrets.env)
 
 from ambient_api.ambientapi import AmbientAPI
 
-def get_reading(sensorname):
-    api = AmbientAPI()
+class WeatherData():
 
-    n = 0
-    while n < 5:
-        try:
-            ws = api.get_devices()[0]
-            break
-        except (IndexError, ConnectionError):
-            pass
+    def __init__(self, stationnum=0):
+        self.stationnum = int(stationnum)
+        self.get_latest_data()
 
-        # Sleep a little and try again
-        time.sleep(5)
-        n += 1
-        # print("Trying again")
-    else:
-        print("System unreachable.")
-        sys.exit()
+    def get_latest_data(self):
+        api = AmbientAPI()
 
-    return ws.last_data[sensorname]
+        n = 0
+        while n < 5:
+            try:
+                ws = api.get_devices()[self.stationnum]
+                break
+            except (IndexError, ConnectionError):
+                pass
+
+            # Sleep a little and try again
+            time.sleep(5)
+            n += 1
+            # print("Trying again")
+        else:
+            print("System unreachable.")
+            sys.exit()
+
+        self.last_data = ws.last_data
+
+    def get_reading(self, propname):
+        return self.last_data[propname]
 
 
 if __name__ == "__main__":
-    sensorname = 'temp2f'
-    print(f"{get_reading(sensorname)=}")
+    wd = WeatherData()
+    print(f"{wd.get_reading('temp2f')=}")
+    print(f"{wd.get_reading('batt2')=}")
+    print(f"{wd.get_reading('date')=}")
