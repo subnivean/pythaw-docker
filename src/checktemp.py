@@ -64,17 +64,26 @@ meanoutfh.write(dline)
 
 if tempF < ALERTTEMP:
     if sp.is_on:
-        mailsend.send("*** Heater problem? ***",
-                      f"Temp dropped below {ALERTTEMP}!")
+        try:
+            mailsend.send("*** Heater problem? ***",
+                          f"Temp dropped below {ALERTTEMP}!")
+        except:
+            pass
     sp.on()
 elif tempF < MINTEMP:
     if sp.is_off:
-        mailsend.send("Turning on the heater",
-                      f"Temp dropped below {MINTEMP}")
+        try:
+            mailsend.send("Turning on the heater",
+                          f"Temp dropped below {MINTEMP}")
+        except:
+            pass
     sp.on()
 elif tempF > MAXTEMP:
     if sp.is_on:
-        mailsend.send("Turning off the heater",
-                      f"Temp above {MAXTEMP}")
+        try:
+            mailsend.send("Turning off the heater",
+                          f"Temp above {MAXTEMP}")
+        except:
+            pass
     sp.off()
 
