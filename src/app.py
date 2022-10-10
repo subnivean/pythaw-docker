@@ -22,7 +22,6 @@ SPIP = 23  # SmartPlug IP address (in 192.168.1.xx range)
 MEANOUTFILE = "/data/meantemps.out"
 
 curtime = datetime.datetime.now()
-curtimeiso = curtime.isoformat().split('.')[0]
 
 try:
     sp = SmartPlug(SPIP)
