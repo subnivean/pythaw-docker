@@ -15,8 +15,8 @@ Invoked from crontab as follows:
 
 Docker Instructions
 -------------------------
-Build via `sudo docker build . -t pythaw`.
+Build via `docker build . -t pythaw`.
 
-Run via `sudo ./run_docker.sh`.
+Run via `./run_docker.sh`.
 
-Access internal bash shell via `sudo ./run_bash.sh`.
+Access internal bash shell via `./run_bash.sh`.
