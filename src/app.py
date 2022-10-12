@@ -66,12 +66,12 @@ if timedeltasec > 3600 and curtime.minute == 0:
 #print(f"{curtime.hour=}")
 #print(f"{timedeltasec=}")
 
-meanoutfh = open(MEANOUTFILE, "ab", 0)
+meanoutfh = open(MEANOUTFILE, "a")
 
 tempF = float(aw.get_reading(WXTEMPSENSOR))
 
 curtimeiso = curtime.isoformat().split('.')[0]
-dline = bytes(f"{curtimeiso} {tempF:.2f}\n", "UTF-8")
+dline = f"{curtimeiso} {tempF:.2f}\n"
 meanoutfh.write(dline)
 
 if tempF < ALERTTEMP:
