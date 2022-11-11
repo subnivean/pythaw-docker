@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import datetime
+import subprocess
 import sys
 
 # Current directory
-from ambientweather import WeatherData
 import mailsend
 from smartplug import SmartPlug
 
@@ -11,13 +11,25 @@ from smartplug import SmartPlug
 MINTEMP = 36.0
 MAXTEMP = 39.0
 ALERTTEMP = 35.5
+SPIP = 23  # SmartPlug IP address (in 192.168.1.xx range)
 
-WXSTATIONNUM = 0  # Per Ambientweather
-WXSENSORNUM = 2
+# Weather station and sensor settings
+WXSTATIONNUM = 0  # Old station, per Ambientweather
+WXSENSORNUM = 2 
 WXTEMPSENSOR = f"temp{WXSENSORNUM}f"
 WXBATTNAME = f"batt{WXSENSORNUM}"
+WXTABLENAME = f"dbtable{WXSTATIONNUM}"
 
-SPIP = 23  # SmartPlug IP address (in 192.168.1.xx range)
+# Data to access the Ambientweather sqlite database
+AWIP = '192.168.1.10'
+AWDBPATH = "/home/pi/ambientweather-docker/data/ambientweather.db"
+REMOTEUSER = "pi"
+LOCALKEYPATH = "/app/id_rsa_rpi"
+AWQUERY = f"""\
+    'SELECT date,{WXTEMPSENSOR},{WXBATTNAME}
+     FROM {WXTABLENAME}
+     ORDER BY ROWID DESC
+     LIMIT 1;'"""
 
 MEANOUTFILE = "/data/meantemps.out"
 
@@ -31,24 +43,39 @@ except:
     sys.exit()
 
 try:
-    aw = WeatherData(WXSTATIONNUM)
+    res = subprocess.run([
+        'ssh', '-q', '-o' 
+        'StrictHostKeyChecking=no', 
+        '-i', LOCALKEYPATH, 
+        '-l', REMOTEUSER, 
+        AWIP, 
+            "sqlite3", AWDBPATH, AWQUERY
+    ], capture_output=True)
 except:
     if curtime.minute == 0:
         mailsend.send(f"Problem accessing Ambientweather", f"{WXSTATIONNUM=}")
     sys.exit()
 
-lastreport = aw.get_reading('date')
-lastreportdt = datetime.datetime.fromisoformat(lastreport.split('.')[0])
-timedeltasec = (curtime - lastreportdt).seconds
+# Parse the data from the last database record
+lastreport, tempF, battlevel = res.stdout.decode('utf-8').strip().split('|')
 
 try:
-    battlevel = float(aw.get_reading(WXBATTNAME))
-except KeyError:
+    tempF = float(tempF)
+except ValueError:
     # Send 'sensor offline' message every hour
     if curtime.minute == 0:
         mailsend.send(f"Sensor #{WXSENSORNUM} is offline",
                       f"No data via Ambientweather, sorry.")
-    sys.exit()
+    sys.exit(1)
+
+try:
+    battlevel = float(battlevel)
+except ValueError:
+    # Send 'sensor offline' message every hour
+    if curtime.minute == 0:
+        mailsend.send(f"Sensor #{WXSENSORNUM} is offline",
+                      f"No data via Ambientweather, sorry.")
+    sys.exit(1)
 
 # Send 'low battery' message once a day
 if battlevel < 1.0 and curtime.hour == 12 and curtime.minute == 0:
@@ -56,6 +83,8 @@ if battlevel < 1.0 and curtime.hour == 12 and curtime.minute == 0:
                   f"Current level: {battlevel}")
 
 # Send 'not reporting' message every hour
+lastreportdt = datetime.datetime.fromisoformat(lastreport.split('.')[0])
+timedeltasec = (curtime - lastreportdt).seconds
 if timedeltasec > 3600 and curtime.minute == 0:
     mailsend.send(f"Sensor #{WXSENSORNUM} not reporting",
                   f"Last report: {lastreport}")
@@ -67,8 +96,6 @@ if timedeltasec > 3600 and curtime.minute == 0:
 #print(f"{timedeltasec=}")
 
 meanoutfh = open(MEANOUTFILE, "a")
-
-tempF = float(aw.get_reading(WXTEMPSENSOR))
 
 curtimeiso = curtime.isoformat().split('.')[0]
 dline = f"{curtimeiso} {tempF:.2f}\n"
