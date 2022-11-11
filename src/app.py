@@ -83,7 +83,7 @@ if battlevel < 1.0 and curtime.hour == 12 and curtime.minute == 0:
                   f"Current level: {battlevel}")
 
 # Send 'not reporting' message every hour
-lastreportdt = datetime.datetime.fromisoformat(lastreport.split('.')[0])
+lastreportdt = datetime.datetime.fromisoformat(lastreport.split('+')[0])
 timedeltasec = (curtime - lastreportdt).seconds
 if timedeltasec > 3600 and curtime.minute == 0:
     mailsend.send(f"Sensor #{WXSENSORNUM} not reporting",
