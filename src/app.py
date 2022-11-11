@@ -15,7 +15,7 @@ SPIP = 23  # SmartPlug IP address (in 192.168.1.xx range)
 
 # Weather station and sensor settings
 WXSTATIONNUM = 0  # Old station, per Ambientweather
-WXSENSORNUM = 2 
+WXSENSORNUM = 2
 WXTEMPSENSOR = f"temp{WXSENSORNUM}f"
 WXBATTNAME = f"batt{WXSENSORNUM}"
 WXTABLENAME = f"dbtable{WXSTATIONNUM}"
@@ -44,11 +44,11 @@ except:
 
 try:
     res = subprocess.run([
-        'ssh', '-q', '-o' 
-        'StrictHostKeyChecking=no', 
-        '-i', LOCALKEYPATH, 
-        '-l', REMOTEUSER, 
-        AWIP, 
+        'ssh', '-q', '-o'
+        'StrictHostKeyChecking=no',
+        '-i', LOCALKEYPATH,
+        '-l', REMOTEUSER,
+        AWIP,
             "sqlite3", AWDBPATH, AWQUERY
     ], capture_output=True)
 except:
