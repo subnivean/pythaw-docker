@@ -10,7 +10,7 @@ to `src/gsecrets.py` and modify with actual data.
 Invoked from crontab as follows:
 
 ```
-* * * * * /home/pi/pythaw-docker/run_docker.sh
+* * * * * /home/pi/pythaw-docker/run_app.sh
 ```
 
 Docker Instructions
