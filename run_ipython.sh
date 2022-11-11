@@ -6,5 +6,5 @@ docker run --rm -it \
   -v $SCRIPT_PATH/data:/data \
   -v $SCRIPT_PATH/src:/app \
   -v $SCRIPT_PATH/ipython:/root/.ipython \
-  pythaw /bin/bash
+  pythaw jupyter-console
 

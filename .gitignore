@@ -3,3 +3,4 @@ awsecrets.py
 __pycache__
 .devcontainer
 id_rsa_rpi
+/ipython
