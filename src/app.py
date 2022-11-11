@@ -50,14 +50,14 @@ try:
         '-l', REMOTEUSER,
         AWIP,
             "sqlite3", AWDBPATH, AWQUERY
-    ], capture_output=True)
+    ], capture_output=True, encoding='utf-8')
 except:
     if curtime.minute == 0:
         mailsend.send(f"Problem accessing Ambientweather", f"{WXSTATIONNUM=}")
     sys.exit()
 
 # Parse the data from the last database record
-lastreport, tempF, battlevel = res.stdout.decode('utf-8').strip().split('|')
+lastreport, tempF, battlevel = res.stdout.strip().split('|')
 
 try:
     tempF = float(tempF)
