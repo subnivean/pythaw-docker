@@ -17,6 +17,8 @@ Docker Instructions
 -------------------------
 Build via `docker build . -t pythaw`.
 
-Run via `./run_docker.sh`.
+Run via `./run_app.sh`.
 
 Access internal bash shell via `./run_bash.sh`.
+
+Quick access to IPython in the container with `./run_ipython.sh` (with persistent history!)
