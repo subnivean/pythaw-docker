@@ -22,7 +22,7 @@ WXTABLENAME = f"dbtable{WXSTATIONNUM}"
 
 # Data to access the Ambientweather sqlite database
 AWIP = '192.168.1.10'
-AWDBPATH = "/home/pi/ambientweather-docker/data/ambientweather.db"
+AWDBPATH = "/home/pi/ambientweather-docker/data/ambientweather.sqlite"
 REMOTEUSER = "pi"
 LOCALKEYPATH = "/app/id_rsa_rpi"
 AWQUERY = f"""\
