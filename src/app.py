@@ -31,7 +31,7 @@ AWQUERY = f"""\
      ORDER BY ROWID DESC
      LIMIT 1;'"""
 
-MEANOUTFILE = "/data/meantemps.out"
+LASTRUNFILE = "/data/lastrun"
 
 curtime = datetime.datetime.now()
 
@@ -95,11 +95,11 @@ if timedeltasec > 3600 and curtime.minute == 0:
 #print(f"{curtime.hour=}")
 #print(f"{timedeltasec=}")
 
-meanoutfh = open(MEANOUTFILE, "a")
+lastrunfh = open(LASTRUNFILE, "w")
 
 curtimeiso = curtime.isoformat().split('.')[0]
 dline = f"{curtimeiso} {tempF:.2f}\n"
-meanoutfh.write(dline)
+lastrunfh.write(dline)
 
 if tempF < ALERTTEMP:
     if sp.is_on:
